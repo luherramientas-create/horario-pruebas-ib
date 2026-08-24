@@ -3,19 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registro de pruebas · Horario IB</title>
+  <title>Lu Herramientas · Horario de Pruebas IB</title>
   <link rel="stylesheet" href="styles.css">
   <style>.subject-group-title{grid-column:1/-1;margin:1rem 0 .25rem;color:#315b85;font-size:1.05rem}</style>
 </head>
 <body>
-<header class="topbar"><div><strong>Horario de Pruebas</strong><span>Bachillerato Internacional · Registro docente</span></div><div id="auth-status">No autenticado</div></header>
+<header class="topbar"><div><strong>Lu Herramientas</strong><span>Horario de Pruebas · Bachillerato Internacional</span></div><div id="auth-status">No autenticado</div></header>
 <main class="container">
-<section id="login-panel" class="card narrow"><h1>Registro de pruebas</h1><p class="muted">Ingrese con su cuenta Google para registrar las pruebas.</p><button id="login-google" class="secondary full" type="button">Continuar con Google</button><p id="login-message" class="muted"></p></section>
+<section id="login-panel" class="card narrow"><h1>Horario de Pruebas</h1><p class="muted">Ingrese con su cuenta Google para registrar las pruebas.</p><button id="login-google" class="secondary full" type="button">Continuar con Google</button><p id="login-message" class="muted"></p></section>
 <section id="app" hidden>
 <section class="card app-head"><div><h1>Registro de pruebas</h1><p class="muted">Seleccione el nivel, la materia y las pruebas que aplicará.</p><div id="program-context" class="program-context"></div></div><button id="logout" class="secondary" type="button">Cerrar sesión</button></section>
 <section class="card"><div class="section-heading"><span class="step">1</span><div><h2>Nivel</h2><p class="muted">¿Para qué nivel desea registrar la prueba?</p></div></div><div class="choice-grid"><button class="choice" data-level="11" type="button"><strong>11.º</strong><span>Bachillerato Internacional</span></button><button class="choice" data-level="12" type="button"><strong>12.º</strong><span>Bachillerato Internacional</span></button></div><div id="ib-level-wrap" class="field" hidden><label for="ib-level">Nivel IB</label><select id="ib-level"><option value="">Seleccione…</option><option value="NS">Nivel Superior (NS)</option><option value="NM">Nivel Medio (NM)</option></select></div></section>
 <section id="subject-section" class="card" hidden><div class="section-heading"><span class="step">2</span><div><h2>Materia</h2><p class="muted">Seleccione la materia.</p></div></div><div id="subject-grid" class="subject-grid"></div></section>
 <section id="tests-section" class="card" hidden><div class="section-heading"><span class="step">3</span><div><h2>Pruebas que va a aplicar</h2><p class="muted">Marque las pruebas. El tiempo sugerido es editable.</p></div></div><div id="tests-list" class="tests-list"></div><div class="actions"><button id="save" class="primary" type="button" disabled>Guardar estas pruebas</button><button id="reset" class="secondary" type="button">Limpiar</button></div><p id="save-message" class="muted"></p></section>
 <section id="success-section" class="card success" hidden><div class="success-icon">✓</div><div><h2>Registro guardado</h2><p id="success-message" class="muted"></p><div class="actions"><button id="another" class="primary" type="button">Registrar otra prueba</button><button id="finish" class="secondary" type="button">Terminar</button></div></div></section>
-</section></main><script type="module" src="app.js?v=20260824-3"></script>
+</section></main><script type="module" src="app.js?v=20260824-4"></script>
 </body></html>
