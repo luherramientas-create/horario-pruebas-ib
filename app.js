@@ -73,9 +73,22 @@ function selectSubject(subject,button,ibLevel=null){
   renderTests();
 }
 
+function renderSelectedSubject(){
+  const existing=$('#selected-subject');
+  if(existing) existing.remove();
+  const box=document.createElement('div');
+  box.id='selected-subject';
+  box.className='selected-subject';
+  const levelText=state.ibLevel ? `Nivel ${state.ibLevel}` : (state.level==='11' ? '11.º' : '');
+  box.innerHTML=`<div class="selected-subject-label">Materia seleccionada</div><div class="selected-subject-name">${state.subject}</div>${levelText?`<div class="selected-subject-level">${levelText}</div>`:''}`;
+  const heading=$('#tests-section .section-heading');
+  heading.insertAdjacentElement('afterend',box);
+}
+
 function renderTests(){
   const list=$('#tests-list');
   list.innerHTML='';
+  renderSelectedSubject();
   state.tests.forEach(test=>{
     const card=document.createElement('article');
     card.className='test-card';
@@ -92,7 +105,7 @@ function renderTests(){
   $('#success-section').hidden=true;
 }
 
-async function saveSelected(){ setMessage('Guardando…');$('#save').disabled=true;try{if(!state.program?.id)throw new Error('No hay una programación activa.');const selected=[];$$('.test-card').forEach(card=>{if(!card.querySelector('.test-check').checked)return;const test=state.tests.find(t=>t.id===card.querySelector('.test-check').dataset.id);const duration=Number(card.querySelector('.duration').value);const support=card.querySelector('.support-check').checked;const percent=Number(card.querySelector('.percent').value)||0;if(!Number.isInteger(duration)||duration<1)throw new Error(`Indique un tiempo válido para ${test.name}.`);const extra=support?extraFor(duration,percent):0;selected.push({testId:test.id,componente:test.name,duracionSugeridaMinutos:test.minutes,duracionMinutos:duration,usaTiempoExtra:support,porcentajeExtra:support?percent:0,minutosExtra:extra,minutosPlanificacion:duration+extra});});if(!selected.length)throw new Error('Seleccione al menos una prueba.');const submissionId=`${Date.now()}-${Math.random().toString(36).slice(2,8)}`;await Promise.all(selected.map(item=>addDoc(collection(db,'solicitudesPruebas'),{programacionId:state.program.id,cursoLectivo:state.program.cursoLectivo,periodo:state.program.periodo,numeroPruebas:state.program.numeroPruebas,submissionId,docenteId:state.user.uid,docenteEmail:state.user.email||'',nivel:state.level,nivelIB:state.ibLevel||null,materia:state.subject,...item,estado:'registrada',createdAt:serverTimestamp(),updatedAt:serverTimestamp()})));$('#success-message').textContent=`Se registraron ${selected.length} prueba${selected.length===1?'':'s'} de ${state.subject}.`,$('#success-section').hidden=false;$('#tests-section').hidden=true;setMessage('');}catch(error){console.error(error);setMessage(error.message||'No fue posible guardar el registro.',true);$('#save').disabled=false;}}
+async function saveSelected(){ setMessage('Guardando…');$('#save').disabled=true;try{if(!state.program?.id)throw new Error('No hay una programación activa.');const selected=[];$$('.test-card').forEach(card=>{if(!card.querySelector('.test-check').checked)return;const test=state.tests.find(t=>t.id===card.querySelector('.test-check').dataset.id);const duration=Number(card.querySelector('.duration').value);const support=card.querySelector('.support-check').checked;const percent=Number(card.querySelector('.percent').value)||0;if(!Number.isInteger(duration)||duration<1)throw new Error(`Indique un tiempo válido para ${test.name}.`);const extra=support?extraFor(duration,percent):0;selected.push({testId:test.id,componente:test.name,duracionSugeridaMinutos:test.minutes,duracionMinutos:duration,usaTiempoExtra:support,porcentajeExtra:support?percent:0,minutosExtra:extra,minutosPlanificacion:duration+extra});});if(!selected.length)throw new Error('Seleccione al menos una prueba.');const submissionId=`${Date.now()}-${Math.random().toString(36).slice(2,8)}`;await Promise.all(selected.map(item=>addDoc(collection(db,'solicitudesPruebas'),{programacionId:state.program.id,cursoLectivo:state.program.cursoLectivo,periodo:state.program.periodo,numeroPruebas:state.program.numeroPruebas,submissionId,docenteId:state.user.uid,docenteEmail:state.user.email||'',nivel:state.level,nivelIB:state.ibLevel||null,materia:state.subject,...item,estado:'registrada',createdAt:serverTimestamp(),updatedAt:serverTimestamp()})));$('#success-message').textContent=`Se registraron ${selected.length} prueba${selected.length===1?'':'s'} de ${state.subject}`;$('#success-section').hidden=false;$('#tests-section').hidden=true;setMessage('');}catch(error){console.error(error);setMessage(error.message||'No fue posible guardar el registro.',true);$('#save').disabled=false;}}
 async function loadActiveProgram(){const active=await getDoc(doc(db,'configuracion','activeProgram'));if(!active.exists()||!active.data().programacionId)return null;const id=active.data().programacionId,p=await getDoc(doc(db,'programaciones',id));if(!p.exists()||p.data().estado!=='abierta')return null;return {id:p.id,...p.data()};}
 $('#login-google').addEventListener('click',async()=>{try{await signInWithPopup(auth,provider);}catch(error){console.error(error);$('#login-message').textContent=`No fue posible iniciar sesión: ${error.code||error.message}`;}});
 $('#logout').addEventListener('click',()=>signOut(auth));
