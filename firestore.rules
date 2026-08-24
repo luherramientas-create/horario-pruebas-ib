@@ -9,10 +9,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return signedIn()
-        && request.auth.token.email in [
-          // Reemplazar con el correo administrativo antes de abrir la aplicación.
-          "REEMPLAZAR_ADMIN@ejemplo.com"
-        ];
+        && request.auth.token.email == "lujimenez1002@gmail.com";
     }
 
     function activeProgramId() {
