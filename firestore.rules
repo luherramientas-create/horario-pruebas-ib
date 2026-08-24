@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email in [
+          // Reemplazar con el correo administrativo antes de abrir la aplicación.
+          "REEMPLAZAR_ADMIN@ejemplo.com"
+        ];
+    }
+
+    function activeProgramId() {
+      return get(/databases/$(database)/documents/configuracion/activeProgram).data.programacionId;
+    }
+
+    match /configuracion/activeProgram {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /programaciones/{programacionId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /solicitudesPruebas/{registroId} {
+      allow create: if signedIn()
+        && request.resource.data.programacionId == activeProgramId()
+        && request.resource.data.docenteId == request.auth.uid
+        && request.resource.data.docenteEmail == request.auth.token.email;
+
+      allow read: if isAdmin()
+        || (signedIn() && resource.data.docenteId == request.auth.uid);
+
+      allow update: if isAdmin()
+        || (signedIn()
+          && resource.data.docenteId == request.auth.uid
+          && request.resource.data.docenteId == resource.data.docenteId
+          && request.resource.data.programacionId == resource.data.programacionId);
+
+      allow delete: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
