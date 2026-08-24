@@ -28,7 +28,7 @@ export const CATALOG = {
         { id: 'eng-nm-listening', name: 'Listening', minutes: 45 }
       ],
       'Biología': [
-        { id: 'bio-nm-p1', name: 'Prueba 1', minutes: 90 },
+        { id: 'bio-nm-p1ab', name: 'Prueba 1 (1A y 1B)', minutes: 90 },
         { id: 'bio-nm-p2', name: 'Prueba 2', minutes: 90 }
       ]
     }
@@ -62,7 +62,7 @@ export const CATALOG = {
         { id: 'eng-nm-listening', name: 'Listening', minutes: 45 }
       ],
       'Biología': [
-        { id: 'bio-nm-p1', name: 'Prueba 1', minutes: 90 },
+        { id: 'bio-nm-p1ab', name: 'Prueba 1 (1A y 1B)', minutes: 90 },
         { id: 'bio-nm-p2', name: 'Prueba 2', minutes: 90 }
       ]
     },
