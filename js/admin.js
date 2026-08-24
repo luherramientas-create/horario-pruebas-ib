@@ -93,7 +93,8 @@ function populateProgramFilter(){
 function populateSubjectFilter(){
   const select=$('#results-subject');
   const current=select.value;
-  const subjects=[...new Set(state.results.filter(r=>!$('#results-level').value||String(r.nivel)===$('#results-level').value).map(r=>r.materia).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+  const level=$('#results-level').value;
+  const subjects=[...new Set(state.results.filter(r=>!level||String(r.nivel)===level).map(r=>r.materia).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
   select.innerHTML='<option value="">Todas</option>';
   subjects.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;select.appendChild(o);});
   if(subjects.includes(current))select.value=current;
@@ -112,10 +113,7 @@ function renderResults(){
   $('#results-count').textContent=`${rows.length} registro${rows.length===1?'':'s'} encontrado${rows.length===1?'':'s'}.`;
   const box=$('#results-box');
   if(!rows.length){box.innerHTML='<div class="empty">Todavía no hay registros que coincidan con los filtros.</div>';return;}
-  rows.sort((a,b)=>{
-    const da=a.createdAt?.seconds||0, db=b.createdAt?.seconds||0;
-    return db-da;
-  });
+  rows.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   const table=document.createElement('table');table.className='results-table';
   table.innerHTML='<thead><tr><th>Programación</th><th>Docente</th><th>Nivel</th><th>Materia</th><th>Prueba</th><th>Sugerido</th><th>Utilizado</th><th>Apoyo</th><th>Extra</th><th>Planificación</th><th>Fecha</th></tr></thead>';
   const tbody=document.createElement('tbody');
@@ -132,14 +130,17 @@ function renderResults(){
 }
 
 async function loadResults(){
-  $('#results-box').innerHTML='<p class="muted">Cargando resultados…</p>';
+  const box=$('#results-box');
+  box.innerHTML='<p class="muted">Cargando resultados…</p>';
+  $('#results-count').textContent='';
   try{
     const snap=await getDocs(collection(db,'solicitudesPruebas'));
     state.results=snap.docs.map(d=>({id:d.id,...d.data()}));
     renderResults();
   }catch(e){
-    console.error(e);
-    $('#results-box').innerHTML='<div class="empty">No fue posible cargar los resultados. Revise las reglas de Firestore.</div>';
+    console.error('Error cargando solicitudesPruebas:',e);
+    $('#results-count').textContent='No se pudieron consultar los registros.';
+    box.innerHTML=`<div class="empty">No fue posible cargar los resultados.<br><small>${e.code||e.message||'Error desconocido'}</small></div>`;
   }
 }
 
@@ -156,5 +157,7 @@ onAuthStateChanged(auth,async user=>{
   if(!user){$('#login-panel').hidden=false;$('#admin-app').hidden=true;$('#auth-status').textContent='No autenticado';return;}
   if(!isAdmin(user)){$('#login-panel').hidden=false;$('#admin-app').hidden=true;$('#auth-status').textContent='Acceso no autorizado';$('#login-message').textContent='Esta cuenta no tiene permisos de administrador.';await signOut(auth);return;}
   $('#login-panel').hidden=true;$('#admin-app').hidden=false;$('#auth-status').textContent=`Administrador · ${user.email}`;
-  try{await loadPrograms();await loadResults();}catch(e){console.error(e);setMessage('No fue posible cargar las programaciones. Revise las reglas de Firestore.',true);}
+  const programLoad=loadPrograms().catch(e=>{console.error('Error cargando programaciones:',e);setMessage(`No fue posible cargar las programaciones: ${e.code||e.message||'error desconocido'}`,true);});
+  const resultsLoad=loadResults();
+  await Promise.allSettled([programLoad,resultsLoad]);
 });
