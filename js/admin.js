@@ -9,11 +9,23 @@ function isAdmin(user){ return user?.email?.toLowerCase() === ADMIN_EMAIL.toLowe
 function setMessage(text,error=false){ $('#message').textContent=text; $('#message').style.color=error?'#a33a3a':''; }
 function context(p){ return `${p.cursoLectivo} · ${p.periodo} · ${p.numeroPruebas}`; }
 
+async function getActiveProgramId(){
+  const activeSnap=await getDoc(doc(db,'configuracion','activeProgram'));
+  if(!activeSnap.exists()) return null;
+  const activeId=activeSnap.data().programacionId;
+  if(!activeId) return null;
+  const programSnap=await getDoc(doc(db,'programaciones',activeId));
+  if(!programSnap.exists()){
+    await setDoc(doc(db,'configuracion','activeProgram'),{programacionId:null,updatedAt:serverTimestamp()});
+    return null;
+  }
+  return activeId;
+}
+
 async function loadPrograms(){
   const snap=await getDocs(query(collection(db,'programaciones'),orderBy('cursoLectivo','desc')));
   state.programs=snap.docs.map(d=>({id:d.id,...d.data()}));
-  const activeSnap=await getDoc(doc(db,'configuracion','activeProgram'));
-  const activeId=activeSnap.exists()?activeSnap.data().programacionId:null;
+  const activeId=await getActiveProgramId();
   const active=activeId?state.programs.find(p=>p.id===activeId):null;
   $('#active-box').className=`status ${active?'open':''}`;
   $('#active-box').innerHTML=active
@@ -54,11 +66,10 @@ async function createProgram(){
   if(!['I','II'].includes(periodo)||!['I','II'].includes(numeroPruebas)){setMessage('Periodo y número de pruebas deben ser I o II.',true);return;}
   const duplicate=state.programs.find(p=>Number(p.cursoLectivo)===cursoLectivo&&p.periodo===periodo&&p.numeroPruebas===numeroPruebas);
   if(duplicate){setMessage(`Ya existe la programación ${context(duplicate)}.`,true);return;}
-  const activeSnap=await getDoc(doc(db,'configuracion','activeProgram'));
-  if(activeSnap.exists()&&activeSnap.data().programacionId){setMessage('Primero cierre la programación activa.',true);return;}
+  const activeId=await getActiveProgramId();
+  if(activeId){setMessage('Primero cierre la programación activa.',true);return;}
   setMessage('Creando programación…');$('#create').disabled=true;
   try{
-    // El ID técnico coincide con el contexto lógico para evitar confusiones.
     const id=`${cursoLectivo}-${periodo}-${numeroPruebas}`;
     const pRef=doc(db,'programaciones',id);
     if((await getDoc(pRef)).exists())throw new Error(`Ya existe la programación ${cursoLectivo} · ${periodo} · ${numeroPruebas}.`);
