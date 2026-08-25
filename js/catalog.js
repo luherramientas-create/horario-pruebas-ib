@@ -24,8 +24,7 @@ export const CATALOG = {
       ],
       'Lengua B: Inglés': [
         { id: 'eng-nm-p1', name: 'Prueba 1', minutes: 75 },
-        { id: 'eng-nm-reading', name: 'Reading', minutes: 60 },
-        { id: 'eng-nm-listening', name: 'Listening', minutes: 45 }
+        { id: 'eng-nm-p2', name: 'Prueba 2 (Listening + Reading)', minutes: 105 }
       ],
       'Biología': [
         { id: 'bio-nm-p1', name: 'Prueba 1', minutes: 90 },
@@ -58,8 +57,7 @@ export const CATALOG = {
       ],
       'Lengua B: Inglés': [
         { id: 'eng-nm-p1', name: 'Prueba 1', minutes: 75 },
-        { id: 'eng-nm-reading', name: 'Reading', minutes: 60 },
-        { id: 'eng-nm-listening', name: 'Listening', minutes: 45 }
+        { id: 'eng-nm-p2', name: 'Prueba 2 (Listening + Reading)', minutes: 105 }
       ],
       'Biología': [
         { id: 'bio-nm-p1', name: 'Prueba 1', minutes: 90 },
