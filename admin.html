@@ -10,12 +10,12 @@
   </style>
 </head>
 <body>
-<header class="topbar"><div><strong>Lu Herramientas</strong><span>Horario de Pruebas · Administración</span></div><div id="auth-status">No autenticado</div></header>
+<header class="topbar"><div class="brand"><span class="brand-icon">◈</span><div><strong>Liceo de Cariari</strong><small>Bachillerato Internacional · Administración</small></div></div><span id="auth-status" class="auth-label">No autenticado</span></header>
 <main class="container">
 <section id="login-panel" class="card narrow"><h1>Administración</h1><p class="muted">Acceso exclusivo del administrador.</p><button id="login-google" class="primary full" type="button">Continuar con Google</button><p id="login-message" class="muted"></p></section>
 <section id="admin-app" hidden class="admin-grid">
 <section class="card"><div style="display:flex;justify-content:space-between;gap:1rem;align-items:center"><div><h1>Programaciones</h1><p class="muted">Cree y controle la programación que utilizarán los docentes.</p></div><button id="logout" class="secondary" type="button">Cerrar sesión</button></div></section>
-<section class="card"><h2>Programación activa</h2><div id="active-box" class="status">Cargando…</div></section>
+<section class="card"><h2>Gestión de docentes</h2><p class="muted">Lista cerrada de docentes. Solo el administrador puede agregar, cambiar nombres, desactivar o reactivar docentes.</p><div class="field"><label for="new-teacher">Nombre completo del docente</label><input id="new-teacher" maxlength="100" placeholder="Nombre y apellidos"></div><button class="primary" id="add-teacher" type="button">Agregar docente</button><p id="teachers-message" role="alert" class="notice"></p><div id="teacher-list">Cargando docentes…</div></section><section class="card"><h2>Programación activa</h2><div id="active-box" class="status">Cargando…</div></section>
 <section class="card"><h2>Crear programación</h2><div class="form-grid">
 <div class="field"><label for="year">Curso lectivo</label><input id="year" type="number" min="2020" max="2100" value="2026"></div>
 <div class="field"><label for="period">Periodo</label><select id="period"><option value="I">I</option><option value="II">II</option></select></div>
@@ -23,6 +23,6 @@
 </div><div class="actions"><button id="create" class="primary" type="button">Crear programación</button></div><p id="message" class="muted"></p></section>
 <section class="card"><h2>Historial</h2><div id="program-list" class="admin-grid"><p class="muted">Cargando…</p></div></section>
 <section class="card"><div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap"><div><h2>Resultados de docentes</h2><p class="muted">Consulta los registros enviados y los tiempos utilizados para planificar el horario.</p></div><button id="refresh-results" class="secondary" type="button">Actualizar resultados</button></div><div class="results-tools"><div class="field"><label for="results-program">Programación</label><select id="results-program"><option value="">Todas</option></select></div><div class="field"><label for="results-level">Nivel</label><select id="results-level"><option value="">Todos</option><option value="11">11.º</option><option value="12">12.º</option></select></div><div class="field"><label for="results-subject">Materia</label><select id="results-subject"><option value="">Todas</option></select></div></div><p id="results-count" class="muted"></p><div id="results-box" class="results-wrap"><p class="muted">Cargando…</p></div></section>
-</section></main>
-<script type="module" src="js/admin.js?v=20260824-5"></script>
+</section></main><footer class="footer">⚒ Lu Herramientas</footer>
+<script type="module" src="js/admin.js?v=redisenio-1"></script>
 </body></html>
