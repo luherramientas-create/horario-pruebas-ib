@@ -124,7 +124,7 @@ function renderResults(){
     const levelText=r.nivelIB?`${r.nivel}.º · ${r.nivelIB}`:`${r.nivel||''}.º`;
     const support=r.usaTiempoExtra?'Sí':'No';
     const extra=r.usaTiempoExtra?`${r.minutosExtra||0} min (${r.porcentajeExtra||0}%)`:'—';
-    tr.innerHTML=`<td>${programText}</td><td>${r.docenteEmail||''}</td><td>${levelText}</td><td>${r.materia||''}</td><td>${r.componente||''}</td><td>${r.duracionSugeridaMinutos==null?'—':r.duracionSugeridaMinutos+' min'}</td><td>${r.duracionMinutos||''} min</td><td><span class="badge">${support}</span></td><td>${extra}</td><td><strong>${r.minutosPlanificacion||r.duracionMinutos||''} min</strong></td><td>${formatTimestamp(r.createdAt)}</td>`;
+    tr.innerHTML=`<td>${programText}</td><td>${r.docenteNombre||r.docenteEmail||''}<br><small>${r.docenteEmail||''}</small></td><td>${levelText}</td><td>${r.materia||''}</td><td>${r.componente||''}</td><td>${r.duracionSugeridaMinutos==null?'—':r.duracionSugeridaMinutos+' min'}</td><td>${r.duracionMinutos||''} min</td><td><span class="badge">${support}</span></td><td>${extra}</td><td><strong>${r.minutosPlanificacion||r.duracionMinutos||''} min</strong></td><td>${formatTimestamp(r.createdAt)}</td>`;
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);box.innerHTML='';box.appendChild(table);
