@@ -1,51 +1,48 @@
 rules_version = '2';
-
 service cloud.firestore {
-  match /databases/{database}/documents {
-
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    function isAdmin() {
-      return signedIn()
-        && request.auth.token.email == "lujimenez1002@gmail.com";
-    }
-
-    function activeProgramId() {
-      return get(/databases/$(database)/documents/configuracion/activeProgram).data.programacionId;
-    }
-
-    match /configuracion/activeProgram {
-      allow read: if signedIn();
-      allow write: if isAdmin();
-    }
-
-    match /programaciones/{programacionId} {
-      allow read: if signedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    match /solicitudesPruebas/{registroId} {
-      allow create: if signedIn()
-        && request.resource.data.programacionId == activeProgramId()
-        && request.resource.data.docenteId == request.auth.uid
-        && request.resource.data.docenteEmail == request.auth.token.email;
-
-      allow read: if isAdmin()
-        || (signedIn() && resource.data.docenteId == request.auth.uid);
-
-      allow update: if isAdmin()
-        || (signedIn()
-          && resource.data.docenteId == request.auth.uid
-          && request.resource.data.docenteId == resource.data.docenteId
-          && request.resource.data.programacionId == resource.data.programacionId);
-
-      allow delete: if isAdmin();
-    }
-
-    match /{document=**} {
-      allow read, write: if false;
-    }
+ match /databases/{database}/documents {
+  function signedIn(){return request.auth!=null;}
+  function isAdmin(){return signedIn() && request.auth.token.email=="lujimenez1002@gmail.com";}
+  function activeProgramId(){return get(/databases/$(database)/documents/configuracion/activeProgram).data.programacionId;}
+  function openProgram(programId){
+   return signedIn() && programId==activeProgramId()
+    && get(/databases/$(database)/documents/programaciones/$(programId)).data.estado=="abierta";
   }
+  match /configuracion/activeProgram {
+   allow read:if signedIn();
+   allow write:if isAdmin();
+  }
+  match /configuracion/docentes {
+   allow read:if signedIn();
+   allow write:if isAdmin();
+  }
+  match /programaciones/{programacionId} {
+   allow read:if signedIn();
+   allow create,update,delete:if isAdmin();
+  }
+  match /solicitudesPruebas/{registroId} {
+   allow create:if signedIn()
+    && openProgram(request.resource.data.programacionId)
+    && request.resource.data.docenteId==request.auth.uid
+    && request.resource.data.docenteEmail==request.auth.token.email;
+   allow read:if isAdmin() || (signedIn() && resource.data.docenteId==request.auth.uid);
+   allow update:if isAdmin() || (
+    signedIn()
+    && resource.data.docenteId==request.auth.uid
+    && openProgram(resource.data.programacionId)
+    && request.resource.data.docenteId==resource.data.docenteId
+    && request.resource.data.docenteEmail==resource.data.docenteEmail
+    && request.resource.data.programacionId==resource.data.programacionId
+    && request.resource.data.nivel==resource.data.nivel
+    && request.resource.data.materia==resource.data.materia
+    && request.resource.data.testId==resource.data.testId
+    && request.resource.data.docenteNombre==resource.data.docenteNombre
+    && request.resource.data.createdAt==resource.data.createdAt
+   );
+   allow delete:if isAdmin();
+  }
+  match /{document=**} {
+   allow read,write:if false;
+  }
+ }
 }
