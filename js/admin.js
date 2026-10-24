@@ -1,3 +1,4 @@
+import {INITIAL_TEACHERS} from './catalog.js';
 import { auth, db, provider, collection, doc, getDoc, serverTimestamp, signInWithPopup, signOut, onAuthStateChanged } from './firebase.js';
 import { getDocs, query, orderBy, writeBatch, setDoc } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js';
 
@@ -123,7 +124,7 @@ function renderResults(){
     const levelText=r.nivelIB?`${r.nivel}.º · ${r.nivelIB}`:`${r.nivel||''}.º`;
     const support=r.usaTiempoExtra?'Sí':'No';
     const extra=r.usaTiempoExtra?`${r.minutosExtra||0} min (${r.porcentajeExtra||0}%)`:'—';
-    tr.innerHTML=`<td>${programText}</td><td>${r.docenteEmail||''}</td><td>${levelText}</td><td>${r.materia||''}</td><td>${r.componente||''}</td><td>${r.duracionSugeridaMinutos==null?'—':r.duracionSugeridaMinutos+' min'}</td><td>${r.duracionMinutos||''} min</td><td><span class="badge">${support}</span></td><td>${extra}</td><td><strong>${r.minutosPlanificacion||r.duracionMinutos||''} min</strong></td><td>${formatTimestamp(r.createdAt)}</td>`;
+    tr.innerHTML=`<td>${programText}</td><td>${r.docenteNombre||r.docenteEmail||''}<br><small>${r.docenteEmail||''}</small></td><td>${levelText}</td><td>${r.materia||''}</td><td>${r.componente||''}</td><td>${r.duracionSugeridaMinutos==null?'—':r.duracionSugeridaMinutos+' min'}</td><td>${r.duracionMinutos||''} min</td><td><span class="badge">${support}</span></td><td>${extra}</td><td><strong>${r.minutosPlanificacion||r.duracionMinutos||''} min</strong></td><td>${formatTimestamp(r.createdAt)}</td>`;
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);box.innerHTML='';box.appendChild(table);
@@ -144,6 +145,36 @@ async function loadResults(){
   }
 }
 
+
+let teachers=[];
+async function loadTeachersAdmin(){
+ const snap=await getDoc(doc(db,'configuracion','docentes'));
+ teachers=snap.exists()?snap.data().items||[]:INITIAL_TEACHERS.map(x=>({...x}));
+ renderTeachersAdmin();
+}
+function renderTeachersAdmin(){
+ const box=$('#teacher-list');box.innerHTML='';
+ for(const teacher of teachers.slice().sort((a,b)=>a.name.localeCompare(b.name,'es'))){
+  const row=document.createElement('div');row.className='teacher-row'+(teacher.active?'':' inactive');
+  const name=document.createElement('strong');name.textContent=teacher.name+(teacher.active?'':' (inactivo)');row.appendChild(name);
+  const actions=document.createElement('div');actions.className='teacher-actions';
+  const edit=document.createElement('button');edit.className='secondary';edit.textContent='Editar';
+  edit.addEventListener('click',async()=>{const proposed=prompt('Nombre completo del docente:',teacher.name);if(proposed===null)return;const value=proposed.trim();if(!value||value.length>100)return teacherMessage('Indique un nombre válido.',true);if(teachers.some(x=>x.id!==teacher.id&&x.name.toLowerCase()===value.toLowerCase()))return teacherMessage('Ya existe un docente con ese nombre.',true);teacher.name=value;await saveTeachers();});
+  const toggle=document.createElement('button');toggle.className='secondary';toggle.textContent=teacher.active?'Desactivar':'Reactivar';toggle.addEventListener('click',async()=>{if(teacher.active&&!confirm('¿Desactivar a '+teacher.name+'? Los registros históricos se conservarán.'))return;teacher.active=!teacher.active;await saveTeachers();});
+  actions.append(edit,toggle);row.appendChild(actions);box.appendChild(row);
+ }
+}
+function teacherMessage(txt,error){const box=$('#teachers-message');box.textContent=txt;box.style.color=error?'#a23c34':'#187c54';}
+async function saveTeachers(){
+ try{await setDoc(doc(db,'configuracion','docentes'),{items:teachers,updatedAt:serverTimestamp()});teacherMessage('Lista de docentes actualizada.',false);renderTeachersAdmin();}
+ catch(e){teacherMessage('No fue posible guardar: '+(e.code||e.message),true);await loadTeachersAdmin();}
+}
+$('#add-teacher').addEventListener('click',async()=>{
+ const input=$('#new-teacher'),name=input.value.trim();if(name.length<5||name.length>100)return teacherMessage('Indique el nombre completo del docente.',true);
+ if(teachers.some(t=>t.name.toLowerCase()===name.toLowerCase()))return teacherMessage('El docente ya existe.',true);
+ teachers.push({id:'docente-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),name,active:true});await saveTeachers();input.value='';
+});
+
 $('#login-google').addEventListener('click',async()=>{try{await signInWithPopup(auth,provider);}catch(e){console.error(e);$('#login-message').textContent=`No fue posible iniciar sesión: ${e.code||e.message}`;}});
 $('#logout').addEventListener('click',()=>signOut(auth));
 $('#create').addEventListener('click',createProgram);
@@ -159,5 +190,6 @@ onAuthStateChanged(auth,async user=>{
   $('#login-panel').hidden=true;$('#admin-app').hidden=false;$('#auth-status').textContent=`Administrador · ${user.email}`;
   const programLoad=loadPrograms().catch(e=>{console.error('Error cargando programaciones:',e);setMessage(`No fue posible cargar las programaciones: ${e.code||e.message||'error desconocido'}`,true);});
   const resultsLoad=loadResults();
-  await Promise.allSettled([programLoad,resultsLoad]);
+  const teachersLoad=loadTeachersAdmin().catch(e=>teacherMessage('No fue posible cargar docentes: '+(e.code||e.message),true));
+  await Promise.allSettled([programLoad,resultsLoad,teachersLoad]);
 });
